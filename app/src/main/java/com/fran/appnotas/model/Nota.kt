@@ -8,3 +8,4 @@ data class Nota(
     var color: String,
     var category: String
 )
+

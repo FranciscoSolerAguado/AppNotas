@@ -46,18 +46,6 @@ class NotaActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         toolbar.setNavigationOnClickListener { finish() }
-        toolbar.inflateMenu(R.menu.menu_nota)
-
-        toolbar.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.action_save -> {
-                    guardarNota()
-                    true
-                }
-
-                else -> false
-            }
-        }
 
         notaId = intent.getIntExtra("id", -1)
 

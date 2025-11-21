@@ -105,5 +105,11 @@ class DBHelper(context: Context) :
         return lista
     }
 
+    fun eliminarNota(id: Int) {
+        val db = this.writableDatabase
+        db.delete(TABLE_NAME, "$COLUMN_ID = ?", arrayOf(id.toString()))
+        db.close()
+    }
+
 
 }

@@ -12,7 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppNotas">
         <activity
-            android:name=".activities.notaActivity"
+            android:name=".activities.CrearNotaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.NotaActivity"
             android:exported="false" />
         <activity
             android:name=".activities.MainActivity"

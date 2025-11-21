@@ -1,7 +1,7 @@
 package com.fran.appnotas.model
 
 data class Nota(
-    val id: Int = 0,
+    var id: Int = 0,
     var title: String,
     var content: String,
     var date: String,

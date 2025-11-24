@@ -19,7 +19,7 @@ class CategoriaAdapter(
 
     override fun onBindViewHolder(holder: CategoriaViewHolder, position: Int) {
         val categoria = lista[position]
-        holder.title.text = categoria.title
+        holder.title.text = categoria.name
 
         holder.itemView.setOnClickListener { onClick(categoria) }
     }

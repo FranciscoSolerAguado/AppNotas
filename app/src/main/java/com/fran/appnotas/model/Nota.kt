@@ -6,6 +6,6 @@ data class Nota(
     var content: String,
     var date: String,
     var color: String,
-    var category: String
+    var category: Categoria
 )
 

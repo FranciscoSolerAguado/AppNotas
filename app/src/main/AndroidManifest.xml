@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppNotas">
         <activity
+            android:name=".activities.NuevaCategoriaActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.CrearNotaActivity"
             android:exported="false" />
         <activity

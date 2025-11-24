@@ -3,32 +3,42 @@ package com.fran.appnotas.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.fran.appnotas.R
+import com.fran.appnotas.databinding.ItemCategoriaBinding
 import com.fran.appnotas.model.Categoria
 
 class CategoriaAdapter(
-    private var lista: MutableList<Categoria>,
-    private val onClick: (Categoria) -> Unit
-) : RecyclerView.Adapter<CategoriaViewHolder>() {
+    private var categorias: MutableList<Categoria>,
+    private val onItemClicked: (Categoria, String) -> Unit
+) : RecyclerView.Adapter<CategoriaAdapter.CategoriaViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoriaViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_nota, parent, false)
-        return CategoriaViewHolder(view)
+        val binding = ItemCategoriaBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return CategoriaViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: CategoriaViewHolder, position: Int) {
-        val categoria = lista[position]
-        holder.title.text = categoria.name
-
-        holder.itemView.setOnClickListener { onClick(categoria) }
+        val categoria = categorias[position]
+        holder.bind(categoria, onItemClicked)
     }
 
-    override fun getItemCount() = lista.size
+    override fun getItemCount(): Int = categorias.size
 
-    fun actualizarLista(nuevaLista: List<Categoria>) {
-        lista.clear()
-        lista.addAll(nuevaLista)
+    fun actualizarLista(nuevasCategorias: MutableList<Categoria>) {
+        categorias = nuevasCategorias
         notifyDataSetChanged()
+    }
+
+    class CategoriaViewHolder(private val binding: ItemCategoriaBinding) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(categoria: Categoria, onItemClicked: (Categoria, String) -> Unit) {
+            binding.tvNombreCategoria.text = categoria.name
+
+            binding.btnEliminarCategoria.setOnClickListener {
+                onItemClicked(categoria, "delete")
+            }
+
+            itemView.setOnClickListener {
+                onItemClicked(categoria, "click")
+            }
+        }
     }
 }

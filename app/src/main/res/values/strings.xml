@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AppNotas</string>
+    <string name="eliminar_categoria">Eliminar categoría</string>
 </resources>

@@ -9,10 +9,10 @@
     tools:context=".activities.MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:fitsSystemWindows="true"
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -24,27 +24,49 @@
             app:title="Notas"
             app:titleTextColor="@android:color/white" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:id="@+id/categoryIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_folder"
+                app:tint="?attr/colorOnSurface" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewCategorias"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:fitsSystemWindows="true"
-        android:id="@+id/recyclerView"
+        android:id="@+id/recyclerViewNotas"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fitsSystemWindows="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appBarLayout" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:fitsSystemWindows="true"
-        android:id="@+id/fab_add_btn"
+        android:id="@+id/fabAddBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:src="@drawable/ic_add"
         app:backgroundTint="@color/purple_Btn"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add"
         app:tint="@android:color/white" />
 </androidx.constraintlayout.widget.ConstraintLayout>

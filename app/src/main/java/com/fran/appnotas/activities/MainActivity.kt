@@ -2,11 +2,12 @@ package com.fran.appnotas.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.fran.appnotas.R
+import com.fran.appnotas.adapter.CategoriaAdapter
 import com.fran.appnotas.adapter.NotaAdapter
 import com.fran.appnotas.databinding.ActivityMainBinding
 import com.fran.appnotas.db.DBHelper
@@ -16,10 +17,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var adapter: NotaAdapter
+    private lateinit var adapterNotas: NotaAdapter
+    private lateinit var adapterCategorias: CategoriaAdapter
     private lateinit var db: DBHelper
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var recyclerViewNotas: RecyclerView
+    private lateinit var recyclerViewCategorias: RecyclerView
     private lateinit var floatingActionButton: FloatingActionButton
+    private lateinit var categoryIcon: ImageView
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,14 +37,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun initComponents() {
         db = DBHelper(this)
-        adapter = NotaAdapter(mutableListOf()) { nota ->
+        
+        // Inicializar adaptadores
+        adapterNotas = NotaAdapter(mutableListOf()) { nota ->
             onNoteClick(nota.id)
         }
-        recyclerView = binding.recyclerView
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapterCategorias = CategoriaAdapter(mutableListOf()) { categoria, action ->
+            // TODO: Implementar el filtrado de notas por categoría
+        }
 
+        // Configurar RecyclerView de Categorías
+        recyclerViewCategorias = binding.recyclerViewCategorias
+        recyclerViewCategorias.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerViewCategorias.adapter = adapterCategorias
+
+        // Configurar RecyclerView de Notas
+        recyclerViewNotas = binding.recyclerViewNotas
+        recyclerViewNotas.adapter = adapterNotas
+        recyclerViewNotas.layoutManager = LinearLayoutManager(this)
+
+        // Cargar datos
+        loadCategories()
         loadNotes()
+
+        categoryIcon = binding.categoryIcon
+        onCreateCategoryClick()
 
         floatingActionButton = binding.fabAddBtn
         onCreateNoteClick()
@@ -53,8 +76,21 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNotes() {
         val lista = obtainNotesDB()
-        adapter.actualizarLista(lista)
+        adapterNotas.actualizarLista(lista)
     }
+
+    private fun loadCategories() {
+        val categorias = db.obtenerCategorias()
+        adapterCategorias.actualizarLista(categorias)
+    }
+
+    private fun onCreateCategoryClick() {
+        binding.categoryIcon.setOnClickListener {
+            val i = Intent(this, NuevaCategoriaActivity::class.java)
+            startActivity(i)
+        }
+    }
+
 
     private fun onCreateNoteClick() {
         binding.fabAddBtn.setOnClickListener {
@@ -71,6 +107,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        loadCategories()
         loadNotes()
     }
 

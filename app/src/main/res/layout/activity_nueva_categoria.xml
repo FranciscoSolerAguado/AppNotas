@@ -25,19 +25,20 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:paddingTop="8dp"
-        android:paddingBottom="88dp" 
+        android:paddingBottom="88dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:listitem="@layout/item_categoria" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabAddCategoria"
+        android:id="@+id/fab_add_categoria"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="Añadir nueva categoría"
         android:src="@drawable/ic_add"
-        app:backgroundTint="?attr/colorPrimaryContainer"
-        app:tint="?attr/colorOnPrimaryContainer" />
+        app:backgroundTint="@color/purple_Btn"
+        app:srcCompat="@android:drawable/ic_input_add"
+        app:tint="@android:color/white" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

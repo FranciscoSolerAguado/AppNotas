@@ -12,6 +12,7 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/background"
         android:fitsSystemWindows="true"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -33,12 +34,12 @@
             android:paddingEnd="16dp">
 
             <ImageView
-                android:id="@+id/categoryIcon"
+                android:id="@+id/ivFolderIcon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="8dp"
                 android:src="@drawable/ic_folder"
-                app:tint="?attr/colorOnSurface" />
+                app:tint="@color/purple_Btn" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewCategorias"

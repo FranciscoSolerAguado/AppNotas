@@ -17,6 +17,7 @@ import com.fran.appnotas.adapter.CategoriaAdapterMain
 import com.fran.appnotas.adapter.NotaAdapter
 import com.fran.appnotas.databinding.ActivityMainBinding
 import com.fran.appnotas.db.DBHelper
+import com.fran.appnotas.model.Categoria
 import com.fran.appnotas.model.Nota
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -38,6 +39,9 @@ class MainActivity : AppCompatActivity() {
     // Action Mode
     private var actionMode: ActionMode? = null
 
+    // Variable para controlar el filtro actual
+    private var categoriaSeleccionada: Categoria? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -52,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         setupRecyclerViews()
 
         loadCategories()
-        loadNotes()
+        loadNotes() // Carga inicial
 
         setupClickListeners()
         setSupportActionBar(binding.toolbar)
@@ -65,7 +69,22 @@ class MainActivity : AppCompatActivity() {
         )
 
         adapterCategoriasMain = CategoriaAdapterMain(mutableListOf()) { categoria ->
-            // TODO: Implementar el filtrado de notas por categoría
+            // Lógica de Filtrado al hacer click en una categoría
+            if (categoriaSeleccionada?.id == categoria.id) {
+                // Si pulsamos la que ya estaba seleccionada -> Quitamos filtro
+                categoriaSeleccionada = null
+                Toast.makeText(this, "Mostrando todas", Toast.LENGTH_SHORT).show()
+            } else {
+                // Si pulsamos una nueva -> Aplicamos filtro
+                categoriaSeleccionada = categoria
+                Toast.makeText(this, "Filtro: ${categoria.name}", Toast.LENGTH_SHORT).show()
+            }
+
+            // 1. Actualizamos visualmente el adaptador de categorías
+            adapterCategoriasMain.setSelectedCategoria(categoriaSeleccionada)
+
+            // 2. Recargamos las notas con el nuevo criterio
+            loadNotes()
         }
     }
 
@@ -94,13 +113,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadNotes() {
-        val lista = db.obtenerNotas()
+        // Decidimos qué cargar basándonos en si hay filtro o no
+        val lista = if (categoriaSeleccionada == null) {
+            db.obtenerNotas() // Carga normal (todas)
+        } else {
+            db.obtenerNotasPorCategoria(categoriaSeleccionada!!.id) // Carga filtrada
+        }
+
         adapterNotas.actualizarLista(lista)
+
+        // Opcional: Mostrar mensaje si no hay notas en esa categoría
+        if (lista.isEmpty() && categoriaSeleccionada != null) {
+            Toast.makeText(this, "No hay notas en esta categoría", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadCategories() {
         val categorias = db.obtenerCategorias()
         adapterCategoriasMain.actualizarLista(categorias)
+        // Aseguramos que se mantenga la selección visual si rotamos pantalla o volvemos
+        adapterCategoriasMain.setSelectedCategoria(categoriaSeleccionada)
     }
 
     private fun onNoteClick(id: Int) {
@@ -120,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             actionMode?.finish()
         } else {
             actionMode?.title = "$selectedCount seleccionada(s)"
-            actionMode?.invalidate() // Refreshes the menu
+            actionMode?.invalidate()
         }
     }
 
@@ -132,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false // Return false if nothing is changed
+            return false
         }
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
@@ -193,6 +225,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Recargamos categorías y notas (manteniendo el filtro si existía)
         loadCategories()
         loadNotes()
     }

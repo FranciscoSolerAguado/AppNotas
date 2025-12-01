@@ -10,7 +10,7 @@ import com.fran.appnotas.model.Nota
 
 class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
     companion object {
-        private const val DATABASE_VERSION = 3 // Versión incrementada para la nueva estructura
+        private const val DATABASE_VERSION = 4 // Versión incrementada para forzar la actualización
         private const val DATABASE_NAME = "db_notas"
 
         // Tabla Notas
@@ -20,17 +20,17 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         private const val COLUMN_NOTAS_CONTENIDO = "contenido"
         private const val COLUMN_NOTAS_FECHA = "fecha"
         private const val COLUMN_NOTAS_COLOR = "color"
-        private const val COLUMN_NOTAS_ID_CATEGORIA = "id_categoria" // Columna para Foreign Key
+        private const val COLUMN_NOTAS_ID_CATEGORIA = "id_categoria"
 
         // Tabla Categorías
         private const val TABLE_CATEGORIAS = "categorias"
         private const val COLUMN_CATEGORIAS_ID = "id"
-        private const val COLUMN_CATEGORIAS_NOMBRE = "nombre"
+        private const val COLUMN_CATEGORIAS_NAME = "name"
     }
 
     override fun onConfigure(db: SQLiteDatabase?) {
         super.onConfigure(db)
-        db?.setForeignKeyConstraintsEnabled(true) // Habilitar claves externas
+        db?.setForeignKeyConstraintsEnabled(true)
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -50,7 +50,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         val createTableCategorias = """
             CREATE TABLE $TABLE_CATEGORIAS (
                 $COLUMN_CATEGORIAS_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                $COLUMN_CATEGORIAS_NOMBRE TEXT NOT NULL UNIQUE
+                $COLUMN_CATEGORIAS_NAME TEXT NOT NULL UNIQUE
             )
         """
         db?.execSQL(createTableCategorias)
@@ -71,9 +71,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             put(COLUMN_NOTAS_CONTENIDO, nota.content)
             put(COLUMN_NOTAS_FECHA, nota.date)
             put(COLUMN_NOTAS_COLOR, nota.color)
-            put(COLUMN_NOTAS_ID_CATEGORIA, nota.category?.id) // Guardar solo el ID
+            put(COLUMN_NOTAS_ID_CATEGORIA, nota.category?.id)
         }
-
         val id = db.insert(TABLE_NOTAS, null, values)
         db.close()
         return id
@@ -86,9 +85,8 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
             put(COLUMN_NOTAS_CONTENIDO, nota.content)
             put(COLUMN_NOTAS_FECHA, nota.date)
             put(COLUMN_NOTAS_COLOR, nota.color)
-            put(COLUMN_NOTAS_ID_CATEGORIA, nota.category?.id) // Guardar solo el ID
+            put(COLUMN_NOTAS_ID_CATEGORIA, nota.category?.id)
         }
-
         db.update(TABLE_NOTAS, values, "$COLUMN_NOTAS_ID = ?", arrayOf(nota.id.toString()))
         db.close()
     }
@@ -99,91 +97,66 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
         db.close()
     }
 
-    fun obtenerNotas(): MutableList<Nota> {
+    private fun getNotesWithQuery(query: String, selectionArgs: Array<String>?): MutableList<Nota> {
         val lista = mutableListOf<Nota>()
         val db = this.readableDatabase
-
-        val query = """
-            SELECT
-                n.$COLUMN_NOTAS_ID, n.$COLUMN_NOTAS_TITULO, n.$COLUMN_NOTAS_CONTENIDO, n.$COLUMN_NOTAS_FECHA, n.$COLUMN_NOTAS_COLOR,
-                c.$COLUMN_CATEGORIAS_ID AS category_id, c.$COLUMN_CATEGORIAS_NOMBRE AS category_nombre
-            FROM
-                $TABLE_NOTAS n
-            LEFT JOIN
-                $TABLE_CATEGORIAS c ON n.$COLUMN_NOTAS_ID_CATEGORIA = c.$COLUMN_CATEGORIAS_ID
-        """
-
-        val cursor: Cursor? = db.rawQuery(query, null)
-
-        cursor?.use { c ->
-            while (c.moveToNext()) {
-                val categoria = if (!c.isNull(c.getColumnIndexOrThrow("category_id"))) {
+        db.rawQuery(query, selectionArgs).use { cursor ->
+            while (cursor.moveToNext()) {
+                val categoria = if (!cursor.isNull(cursor.getColumnIndexOrThrow("category_id"))) {
                     Categoria(
-                        id = c.getInt(c.getColumnIndexOrThrow("category_id")),
-                        name = c.getString(c.getColumnIndexOrThrow("category_nombre"))
+                        id = cursor.getInt(cursor.getColumnIndexOrThrow("category_id")),
+                        name = cursor.getString(cursor.getColumnIndexOrThrow("category_name"))
                     )
                 } else {
                     null
                 }
 
                 val nota = Nota(
-                    id = c.getInt(c.getColumnIndexOrThrow(COLUMN_NOTAS_ID)),
-                    title = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_TITULO)),
-                    content = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_CONTENIDO)),
-                    date = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_FECHA)),
-                    color = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_COLOR)),
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_NOTAS_ID)),
+                    title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTAS_TITULO)),
+                    content = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTAS_CONTENIDO)),
+                    date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTAS_FECHA)),
+                    color = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTAS_COLOR)),
                     category = categoria
                 )
                 lista.add(nota)
             }
         }
-
         db.close()
         return lista
     }
 
-    fun obtenerNotaPorId(id: Int): Nota? {
-        val db = this.readableDatabase
-        var nota: Nota? = null
-
+    fun obtenerNotas(): MutableList<Nota> {
         val query = """
             SELECT
                 n.$COLUMN_NOTAS_ID, n.$COLUMN_NOTAS_TITULO, n.$COLUMN_NOTAS_CONTENIDO, n.$COLUMN_NOTAS_FECHA, n.$COLUMN_NOTAS_COLOR,
-                c.$COLUMN_CATEGORIAS_ID AS category_id, c.$COLUMN_CATEGORIAS_NOMBRE AS category_nombre
-            FROM
-                $TABLE_NOTAS n
-            LEFT JOIN
-                $TABLE_CATEGORIAS c ON n.$COLUMN_NOTAS_ID_CATEGORIA = c.$COLUMN_CATEGORIAS_ID
-            WHERE
-                n.$COLUMN_NOTAS_ID = ?
+                c.$COLUMN_CATEGORIAS_ID AS category_id, c.$COLUMN_CATEGORIAS_NAME AS category_name
+            FROM $TABLE_NOTAS n LEFT JOIN $TABLE_CATEGORIAS c ON n.$COLUMN_NOTAS_ID_CATEGORIA = c.$COLUMN_CATEGORIAS_ID
         """
+        return getNotesWithQuery(query, null)
+    }
 
-        val cursor: Cursor? = db.rawQuery(query, arrayOf(id.toString()))
+    fun obtenerNotasPorCategoria(idCategoria: Int): MutableList<Nota> {
+        val query = """
+            SELECT
+                n.$COLUMN_NOTAS_ID, n.$COLUMN_NOTAS_TITULO, n.$COLUMN_NOTAS_CONTENIDO, n.$COLUMN_NOTAS_FECHA, n.$COLUMN_NOTAS_COLOR,
+                c.$COLUMN_CATEGORIAS_ID AS category_id, c.$COLUMN_CATEGORIAS_NAME AS category_name
+            FROM $TABLE_NOTAS n LEFT JOIN $TABLE_CATEGORIAS c ON n.$COLUMN_NOTAS_ID_CATEGORIA = c.$COLUMN_CATEGORIAS_ID
+            WHERE n.$COLUMN_NOTAS_ID_CATEGORIA = ?
+        """
+        return getNotesWithQuery(query, arrayOf(idCategoria.toString()))
+    }
 
-        cursor?.use { c ->
-            if (c.moveToFirst()) {
-                val categoria = if (!c.isNull(c.getColumnIndexOrThrow("category_id"))) {
-                    Categoria(
-                        id = c.getInt(c.getColumnIndexOrThrow("category_id")),
-                        name = c.getString(c.getColumnIndexOrThrow("category_nombre"))
-                    )
-                } else {
-                    null
-                }
-
-                nota = Nota(
-                    id = c.getInt(c.getColumnIndexOrThrow(COLUMN_NOTAS_ID)),
-                    title = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_TITULO)),
-                    content = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_CONTENIDO)),
-                    date = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_FECHA)),
-                    color = c.getString(c.getColumnIndexOrThrow(COLUMN_NOTAS_COLOR)),
-                    category = categoria
-                )
-            }
-        }
-
-        db.close()
-        return nota
+    fun obtenerNotaPorId(id: Int): Nota? {
+        val query = """
+            SELECT
+                n.$COLUMN_NOTAS_ID, n.$COLUMN_NOTAS_TITULO, n.$COLUMN_NOTAS_CONTENIDO, n.$COLUMN_NOTAS_FECHA, n.$COLUMN_NOTAS_COLOR,
+                c.$COLUMN_CATEGORIAS_ID AS category_id, c.$COLUMN_CATEGORIAS_NAME AS category_name
+            FROM $TABLE_NOTAS n LEFT JOIN $TABLE_CATEGORIAS c ON n.$COLUMN_NOTAS_ID_CATEGORIA = c.$COLUMN_CATEGORIAS_ID
+            WHERE n.$COLUMN_NOTAS_ID = ?
+        """
+        val notes = getNotesWithQuery(query, arrayOf(id.toString()))
+        return if (notes.isNotEmpty()) notes[0] else null
     }
 
     // --- Métodos para Categorías ---
@@ -191,7 +164,7 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     fun insertarCategoria(categoria: Categoria): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
-            put(COLUMN_CATEGORIAS_NOMBRE, categoria.name)
+            put(COLUMN_CATEGORIAS_NAME, categoria.name)
         }
         val id = db.insert(TABLE_CATEGORIAS, null, values)
         db.close()
@@ -201,14 +174,12 @@ class DBHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null
     fun obtenerCategorias(): MutableList<Categoria> {
         val lista = mutableListOf<Categoria>()
         val db = this.readableDatabase
-        val cursor: Cursor? = db.rawQuery("SELECT * FROM $TABLE_CATEGORIAS", null)
-
-        cursor?.use { c ->
-            while (c.moveToNext()) {
+        db.rawQuery("SELECT * FROM $TABLE_CATEGORIAS ORDER BY $COLUMN_CATEGORIAS_NAME ASC", null).use { cursor ->
+            while (cursor.moveToNext()) {
                 lista.add(
                     Categoria(
-                        id = c.getInt(c.getColumnIndexOrThrow(COLUMN_CATEGORIAS_ID)),
-                        name = c.getString(c.getColumnIndexOrThrow(COLUMN_CATEGORIAS_NOMBRE))
+                        id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIAS_ID)),
+                        name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORIAS_NAME))
                     )
                 )
             }

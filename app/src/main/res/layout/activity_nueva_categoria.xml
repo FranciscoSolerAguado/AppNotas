@@ -43,7 +43,7 @@
         android:layout_margin="24dp"
         android:contentDescription="Añadir nueva categoría"
         android:src="@drawable/ic_add"
-        app:backgroundTint="@color/purple_Btn"
+        app:backgroundTint="@color/green_Btn"
         app:tint="@color/white"
         app:elevation="6dp"
         app:borderWidth="0dp" />

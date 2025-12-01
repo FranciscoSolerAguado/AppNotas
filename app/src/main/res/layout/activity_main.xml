@@ -41,7 +41,7 @@
                 android:layout_height="24dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_folder"
-                app:tint="@color/purple_Btn"
+                app:tint="@color/green_Btn"
                 android:contentDescription="Icono Carpeta" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -77,7 +77,7 @@
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_add"
-        app:backgroundTint="@color/purple_Btn"
+        app:backgroundTint="@color/green_Btn"
         app:tint="@color/white"
         app:elevation="6dp"
         app:borderWidth="0dp"

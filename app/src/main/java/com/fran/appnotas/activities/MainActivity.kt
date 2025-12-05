@@ -18,7 +18,6 @@ import com.fran.appnotas.adapter.NotaAdapter
 import com.fran.appnotas.databinding.ActivityMainBinding
 import com.fran.appnotas.db.DBHelper
 import com.fran.appnotas.model.Categoria
-import com.fran.appnotas.model.Nota
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
